@@ -1,10 +1,11 @@
 import React from 'react';
-
+import {Header, DataTable} from "./components";
 
 function App() {
     return (
         <div className="App">
-            hello world
+            <Header/>
+            <DataTable/>
         </div>
     );
 }
