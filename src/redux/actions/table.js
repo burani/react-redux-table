@@ -40,6 +40,11 @@ export const setPageSize = (payload) => ({
     payload
 });
 
+export const addRow = (payload) => ({
+    type: "ADD_ROW",
+    payload
+});
+
 
 //THUNKS
 //contentSize = s/l

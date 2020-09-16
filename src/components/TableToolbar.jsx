@@ -35,7 +35,7 @@ function TableToolbar({onAddButtonClick}) {
                 Table
             </Typography>
             <Tooltip title="Add Row">
-                <IconButton aria-label="add row">
+                <IconButton aria-label="add row" onClick={onAddButtonClick}>
                     <AddIcon/>
                 </IconButton>
             </Tooltip>

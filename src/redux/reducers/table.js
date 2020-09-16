@@ -63,6 +63,12 @@ const table = (state = initialState, action) => {
                     draftState.rows.sort(compareValues(action.payload.type, action.payload.order));
                 });
         }
+        case 'ADD_ROW': {
+            return produce(state, draftState => {
+                draftState.rows.unshift(action.payload);
+                draftState.page = 0;
+            });
+        }
         case 'FILTER_ROWS': {
             const filteredRows = state.filter(o =>
                 Object.keys(o).some(k => o[k].toLowerCase().includes(action.payload.toLowerCase())));

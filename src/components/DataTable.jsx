@@ -1,12 +1,13 @@
 import React from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {Grid, Paper, TableContainer, Table, TableBody, TablePagination, TableRow, TableCell} from "@material-ui/core";
+import {Grid, Paper, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow} from "@material-ui/core";
 import TableHeader from "./Tableheader";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TableToolbar from "./TableToolbar";
-import {fetchRows, setPage, setPageSize, sortRows} from "../redux/actions/table";
+import {addRow, fetchRows, setPage, setPageSize, sortRows} from "../redux/actions/table";
 import {setSortBy} from "../redux/actions/filters";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import AddForm from "./AddForm";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -38,8 +39,8 @@ const useStyles = makeStyles((theme) => ({
 
 function DataTable(props) {
 
-    const [sortIndex, setSortIndex] = React.useState(null);
     const [selectedRow, setSelectedRow] = React.useState(null);
+    const [formOpen, setFormOpen] = React.useState(false);
     const dispatch = useDispatch();
 
     const page = useSelector(({table}) => table.page);
@@ -50,8 +51,23 @@ function DataTable(props) {
     const isLoaded = useSelector(({table}) => table.isLoaded);
 
 
+
     const onPageChange = (event, newPage) => {
         dispatch(setPage(newPage));
+    };
+
+    const onFormSubmit = (values) => {
+        console.log("submit form from here");
+        console.log(values);
+        dispatch(addRow({...values, address: null, description: ""}));
+        setFormOpen(false);
+    };
+
+    const onFormOpen = () => {
+        setFormOpen(true);
+    };
+    const onFormClose = () => {
+        setFormOpen(false);
     };
 
     const onChangeRowsPerPage = (event) => {
@@ -74,8 +90,10 @@ function DataTable(props) {
     };
 
     const onRowClick = (rowId) => {
-        setSelectedRow(rowId);
+        selectedRow === rowId? setSelectedRow(null): setSelectedRow(rowId);
     };
+
+
 
     React.useEffect(() => {
         console.log("rendered first");
@@ -105,7 +123,7 @@ function DataTable(props) {
                 <Grid item xs={11}>
                     {isLoaded? <div className={classes.root}>
                         <Paper className={classes.paper}>
-                            <TableToolbar/>
+                            <TableToolbar onAddButtonClick={onFormOpen}/>
                             <TableContainer className={classes.container}>
                                 <Table
                                     stickyHeader
@@ -166,53 +184,10 @@ function DataTable(props) {
                 <Grid item xs/>
             </Grid>
 
+            <AddForm open={formOpen} onSubmit={onFormSubmit} onClose={onFormClose}/>
+
         </div>
     );
 }
 
 export default DataTable;
-
-
-// {stableSort(rows, getComparator(order, orderBy))
-//     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-//     .map((row, index) => {
-//         const isItemSelected = isSelected(row.name);
-//         const labelId = `enhanced-table-checkbox-${index}`;
-//
-//         return (
-//             <TableRow
-//                 hover
-//                 onClick={(event) => handleClick(event, row.name)}
-//                 role="checkbox"
-//                 aria-checked={isItemSelected}
-//                 tabIndex={-1}
-//                 key={row.name}
-//                 selected={isItemSelected}
-//             >
-//                 <TableCell padding="checkbox">
-//                     <Checkbox
-//                         checked={isItemSelected}
-//                         inputProps={{"aria-labelledby": labelId}}
-//                     />
-//                 </TableCell>
-//                 <TableCell
-//                     component="th"
-//                     id={labelId}
-//                     scope="row"
-//                     padding="none"
-//                 >
-//                     {row.name}
-//                 </TableCell>
-//                 <TableCell align="right">{row.calories}</TableCell>
-//                 <TableCell align="right">{row.fat}</TableCell>
-//                 <TableCell align="right">{row.carbs}</TableCell>
-//                 <TableCell align="right">{row.protein}</TableCell>
-//             </TableRow>
-//         );
-//     })}
-
-// {emptyRows > 0 && (
-//     <TableRow style={{height: (dense ? 33 : 53) * emptyRows}}>
-//         <TableCell colSpan={6}/>
-//     </TableRow>
-// )}
