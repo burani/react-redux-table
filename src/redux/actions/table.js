@@ -15,11 +15,6 @@ export const setRows = (payload) => ({
     payload
 });
 
-export const setLoaded = (payload) => ({
-    type: "SET_LOADED",
-    payload
-});
-
 export const sortRows = (payload) => ({
     type: "SORT_ROWS",
     payload
@@ -56,7 +51,7 @@ export const setSelectedRow = (payload) => ({
 export const fetchRows = (contentSize) => (dispatch) => {
     axios.get(urls[contentSize]).then((res) => {
         dispatch(setRows(res.data));
-    })
+    }).catch((err) => alert(err))
 };
 
 

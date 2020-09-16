@@ -1,7 +1,6 @@
 import React from 'react';
 import {AppBar, fade, Hidden, IconButton, InputBase, makeStyles, Toolbar, Typography} from "@material-ui/core";
 import SearchIcon from '@material-ui/icons/Search';
-import SplitButton from "./SplitButton";
 import {useDispatch} from "react-redux";
 import {updateSearchText} from "../redux/actions/filters";
 
@@ -50,34 +49,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Header() {
-    const [open, setOpen] = React.useState(false);
-    //searchText хранится как в обычном стейте(записывается при каждом нажатии), так и в редаксе(записывается при клике пользователя), чтобы
-    // dataTable реагировал на его изменения и производил ререндер
-    //Сделано чтобы фильтрация происходила только по клику пользователя
     const [searchText, setSearchText] = React.useState("");
-    const anchorRef = React.useRef(null);
-    const [selectedIndex, setSelectedIndex] = React.useState(1);
     const dispatch = useDispatch();
-
-    const handleClick = () => {
-        console.info(`you clicked button with index ${selectedIndex}`);
-    };
-
-    const handleMenuItemClick = (event, index) => {
-        setSelectedIndex(index);
-        setOpen(false);
-    };
-
-    const handleToggle = () => {
-        setOpen((prevOpen) => !prevOpen);
-    };
-
-    const handleClose = (event) => {
-        if (anchorRef.current && anchorRef.current.contains(event.target)) {
-            return;
-        }
-        setOpen(false);
-    };
 
     const onSearchTextChange = (event) => {
         console.log(event.target.value);
@@ -115,9 +88,6 @@ function Header() {
                                 onClick={onFilterButtonClick}>
                         <SearchIcon/>
                     </IconButton>
-                    <SplitButton anchorRef={anchorRef} handleClick={handleClick}
-                                 handleClose={handleClose} handleMenuItemClick={handleMenuItemClick}
-                                 handleToggle={handleToggle} open={open} selectedIndex={selectedIndex}/>
 
                 </Toolbar>
 

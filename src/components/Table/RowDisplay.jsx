@@ -9,7 +9,6 @@ import CloseIcon from '@material-ui/icons/Close';
 const useStyles = makeStyles({
     root: {
         minWidth: 275,
-        fontSize: 13,
         maxWidth: 650,
         position: "relative"
     },
@@ -40,23 +39,23 @@ function RowDisplay({selectedRow, onRowDisplayClose}) {
                     <Typography  variant="h5" component="h2">
                         <b>Selected user: </b> {selectedRow.firstName + " " + selectedRow.lastName}
                     </Typography>
-                    <Typography variant="h5" component="h2">
-                        <b>Description: </b> {selectedRow.description}
-                    </Typography>
-                    <Typography variant="h5" component="h2">
-                        <b>Address: </b>{selectedRow.address.streetAddress}
-                    </Typography>
-                    <Typography variant="h5" component="h2">
-                        <b>City: </b>{selectedRow.address.city}
-                    </Typography>
-                    <Typography variant="h5" component="h2">
-                        <b>State/province: </b>{selectedRow.address.state}
-                    </Typography>
-                    <Typography variant="h5" component="h2">
-                        <b>Index: </b>{selectedRow.address.zip}
-                    </Typography>
-
-
+                    {selectedRow.address? <div>
+                        <Typography variant="h5" component="h2">
+                            <b>Description: </b> {selectedRow.description}
+                        </Typography>
+                        <Typography variant="h5" component="h2">
+                            <b>Address: </b>{selectedRow.address.streetAddress}
+                        </Typography>
+                        <Typography variant="h5" component="h2">
+                            <b>City: </b>{selectedRow.address.city}
+                        </Typography>
+                        <Typography variant="h5" component="h2">
+                            <b>State/province: </b>{selectedRow.address.state}
+                        </Typography>
+                        <Typography variant="h5" component="h2">
+                            <b>Index: </b>{selectedRow.address.zip}
+                        </Typography>
+                    </div>: ""}
                 </CardContent>
             </Card>
 

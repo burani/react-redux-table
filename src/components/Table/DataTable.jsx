@@ -4,11 +4,12 @@ import {Grid, Paper, Table, TableBody, TableCell, TableContainer, TablePaginatio
 import TableHeader from "./Tableheader";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TableToolbar from "./TableToolbar";
-import {addRow, fetchRows, filterRows, setPage, setPageSize, setSelectedRow, sortRows} from "../redux/actions/table";
-import {setSortBy} from "../redux/actions/filters";
+import {addRow, fetchRows, setPage, setPageSize, setSelectedRow, sortRows} from "../../redux/actions/table";
+import {setSortBy} from "../../redux/actions/filters";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import AddForm from "./AddForm";
+import AddForm from "../AddForm";
 import RowDisplay from "./RowDisplay";
+import UserDialog from "../UserDialog";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -35,14 +36,21 @@ const useStyles = makeStyles((theme) => ({
         position: "absolute",
         top: 20,
         width: 1
+    },
+    progress:{
+        position: "absolute",
+        top: "50vh",
+        right: "100vh"
     }
+
 }));
 
 function DataTable() {
     const [formOpen, setFormOpen] = React.useState(false);
+    const [dialogOpen, setDialogOpen] = React.useState(false);
     const [filteredRows, setFilteredRows] = React.useState([]);
-    const dispatch = useDispatch();
 
+    const dispatch = useDispatch();
     const page = useSelector(({table}) => table.page);
     const pageSize = useSelector(({table}) => table.pageSize);
     const rows = useSelector(({table}) => table.rows);
@@ -50,6 +58,15 @@ function DataTable() {
     const selectedRowObj = useSelector(({table}) => table.selectedRow);
     const sortBy = useSelector(({filters}) => filters.sortBy);
     const searchText = useSelector(({filters}) => filters.searchText);
+
+    const handleClose = (value) => {
+        dispatch(fetchRows(value));
+        setDialogOpen(false);
+    };
+
+    const handleListItemClick = (value) => {
+        handleClose(value);
+    };
 
     const filterRows = (rows, searchText) => {
         if (!searchText) return rows;
@@ -66,8 +83,6 @@ function DataTable() {
     };
 
     const onFormSubmit = (values) => {
-        console.log("submit form from here");
-        // console.log(values);
         dispatch(addRow({...values, address: null, description: ""}));
         setFormOpen(false);
     };
@@ -80,8 +95,6 @@ function DataTable() {
     };
 
     const onChangeRowsPerPage = (event) => {
-        debugger;
-
         dispatch(setPageSize(parseInt(event.target.value, 10)));
         dispatch(setPage(0));
     };
@@ -93,7 +106,6 @@ function DataTable() {
         dispatch(setSortBy(newSortBy));
     };
 
-    //возвращает нам метод, который вызывает OnColumnHeadClick
     const createOnColumnHeadClick = (property) => (event) => {
         OnColumnHeadClick(event, property);
     };
@@ -119,7 +131,7 @@ function DataTable() {
 
     React.useEffect(() => {
         console.log("rendered first");
-        dispatch(fetchRows("s"));
+        setDialogOpen(true);
     }, [dispatch]);
 
     React.useEffect(() => {
@@ -134,19 +146,20 @@ function DataTable() {
         {id: 'phone', numeric: false, disablePadding: false, label: 'Phone'},
     ];
 
-    // const filteredRows = filterRows(rows, searchText);
     const paginatedRows = filteredRows.slice(page * pageSize, page * pageSize + pageSize);//rows заменить на filteredRows
     const emptyRows = pageSize - Math.min(pageSize, filteredRows.length - page * pageSize);
-    // console.log(filteredRows);
-    // console.log(emptyRows);
     const classes = useStyles();
     return (
         <div>
             <Grid container>
                 <Grid item xs/>
                 <Grid item xs={11}>
+                    {dialogOpen &&
+                    <UserDialog open={dialogOpen} handleClose={handleClose} handleListItemClick={handleListItemClick}
+                    />}
                     {isLoaded ? <div className={classes.root}>
-                        {selectedRowObj && <RowDisplay selectedRow={selectedRowObj} onRowDisplayClose={onRowDisplayClose}/>}
+                        {selectedRowObj &&
+                        <RowDisplay selectedRow={selectedRowObj} onRowDisplayClose={onRowDisplayClose}/>}
 
                         <Paper className={classes.paper}>
                             <TableToolbar onAddButtonClick={onFormOpen}/>
@@ -168,7 +181,8 @@ function DataTable() {
                                                     onClick={() => onRowClick(row)}
                                                     tabIndex={-1}
                                                     key={row.id + row.email}
-                                                    selected={selectedRowObj ? row.id + row.email === selectedRowObj.id + selectedRowObj.email : false}
+                                                    selected={selectedRowObj ? row.id + row.email === selectedRowObj.id +
+                                                        selectedRowObj.email : false}
                                                 >
                                                     <TableCell
                                                         component="th"
@@ -204,14 +218,12 @@ function DataTable() {
                                 onChangeRowsPerPage={onChangeRowsPerPage}
                             />
                         </Paper>
-                    </div> : <CircularProgress color="secondary"/>}
+                    </div> : <CircularProgress color="secondary" className={classes.progress} size={70}/>}
 
                 </Grid>
                 <Grid item xs/>
             </Grid>
-
             <AddForm open={formOpen} onSubmit={onFormSubmit} onClose={onFormClose}/>
-
         </div>
     );
 }
