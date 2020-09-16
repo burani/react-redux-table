@@ -3,7 +3,7 @@ const initialState = {
         type: null,
         order: 'asc'
     },
-    searchText: '',
+    searchText: ''
 };
 
 const filters = (state = initialState, action) => {
@@ -13,11 +13,10 @@ const filters = (state = initialState, action) => {
                 ...state,
                 sortBy: action.payload
             };
-
         case 'UPDATE_SEARCH_TEXT':
             return {
                 ...state,
-                searchText: action.payload,
+                searchText: action.payload
             };
 
         default:

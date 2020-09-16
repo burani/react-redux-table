@@ -51,8 +51,6 @@ export const addRow = (payload) => ({
 export const fetchRows = (contentSize) => (dispatch) => {
     axios.get(urls[contentSize]).then((res) => {
         dispatch(setRows(res.data));
-        //    TODO: сбросить фильтры
-
     })
 };
 

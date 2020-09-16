@@ -1,7 +1,9 @@
 import React from 'react';
-import {makeStyles, AppBar, Toolbar, Typography, InputBase, Hidden, fade, IconButton} from "@material-ui/core";
+import {AppBar, fade, Hidden, IconButton, InputBase, makeStyles, Toolbar, Typography} from "@material-ui/core";
 import SearchIcon from '@material-ui/icons/Search';
 import SplitButton from "./SplitButton";
+import {useDispatch} from "react-redux";
+import {updateSearchText} from "../redux/actions/filters";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -49,10 +51,14 @@ const useStyles = makeStyles((theme) => ({
 
 function Header() {
     const [open, setOpen] = React.useState(false);
+    //searchText хранится как в обычном стейте(записывается при каждом нажатии), так и в редаксе(записывается при клике пользователя), чтобы
+    // dataTable реагировал на его изменения и производил ререндер
+    //Сделано чтобы фильтрация происходила только по клику пользователя
+    const [searchText, setSearchText] = React.useState("");
     const anchorRef = React.useRef(null);
     const [selectedIndex, setSelectedIndex] = React.useState(1);
+    const dispatch = useDispatch();
 
-    //здесь надо диспатичить экшен
     const handleClick = () => {
         console.info(`you clicked button with index ${selectedIndex}`);
     };
@@ -70,8 +76,16 @@ function Header() {
         if (anchorRef.current && anchorRef.current.contains(event.target)) {
             return;
         }
-
         setOpen(false);
+    };
+
+    const onSearchTextChange = (event) => {
+        console.log(event.target.value);
+        setSearchText(event.target.value);
+    };
+
+    const onFilterButtonClick = () => {
+        dispatch(updateSearchText(searchText));
     };
 
     const classes = useStyles();
@@ -93,13 +107,14 @@ function Header() {
                                 input: classes.inputInput,
                             }}
                             inputProps={{'aria-label': 'search'}}
-                            value="text"
+                            value={searchText}
+                            onChange={onSearchTextChange}
                         />
                     </div>
-                    {/*<IconButton color="secondary" aria-label="search-row" component="span" onClick={() => {*/}
-                    {/*    console.log("dispatch text from here")}}>*/}
-                    {/*    <SearchIcon/>*/}
-                    {/*</IconButton>*/}
+                    <IconButton color="secondary" aria-label="search-row" component="span"
+                                onClick={onFilterButtonClick}>
+                        <SearchIcon/>
+                    </IconButton>
                     <SplitButton anchorRef={anchorRef} handleClick={handleClick}
                                  handleClose={handleClose} handleMenuItemClick={handleMenuItemClick}
                                  handleToggle={handleToggle} open={open} selectedIndex={selectedIndex}/>

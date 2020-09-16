@@ -4,7 +4,7 @@ import {Grid, Paper, Table, TableBody, TableCell, TableContainer, TablePaginatio
 import TableHeader from "./Tableheader";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TableToolbar from "./TableToolbar";
-import {addRow, fetchRows, setPage, setPageSize, sortRows} from "../redux/actions/table";
+import {addRow, fetchRows, filterRows, setPage, setPageSize, sortRows} from "../redux/actions/table";
 import {setSortBy} from "../redux/actions/filters";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AddForm from "./AddForm";
@@ -37,20 +37,28 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function DataTable(props) {
-
+function DataTable() {
     const [selectedRow, setSelectedRow] = React.useState(null);
     const [formOpen, setFormOpen] = React.useState(false);
+    const [filteredRows, setFilteredRows] = React.useState([]);
     const dispatch = useDispatch();
 
     const page = useSelector(({table}) => table.page);
-    const totalPages = useSelector(({table}) => table.totalPages);
     const pageSize = useSelector(({table}) => table.pageSize);
-    const sortBy = useSelector(({filters}) => filters.sortBy);
     const rows = useSelector(({table}) => table.rows);
     const isLoaded = useSelector(({table}) => table.isLoaded);
+    const sortBy = useSelector(({filters}) => filters.sortBy);
+    const searchText = useSelector(({filters}) => filters.searchText);
 
-
+    const filterRows = (rows, searchText) => {
+        if (!searchText) return rows;
+        if (!rows.length) return [];
+        return rows.filter(o =>
+            Object.keys(o).some(k => {
+                return (("" + o[k]).toLowerCase().includes(searchText.toLowerCase()));
+            })
+        );
+    };
 
     const onPageChange = (event, newPage) => {
         dispatch(setPage(newPage));
@@ -79,7 +87,7 @@ function DataTable(props) {
 
     const OnColumnHeadClick = (event, property) => {
         const isAsc = sortBy.type === property && sortBy.order === 'asc';
-        const newOrder = isAsc? 'desc': 'asc';
+        const newOrder = isAsc ? 'desc' : 'asc';
         const newSortBy = {type: property, order: newOrder};
         dispatch(setSortBy(newSortBy));
     };
@@ -90,14 +98,17 @@ function DataTable(props) {
     };
 
     const onRowClick = (rowId) => {
-        selectedRow === rowId? setSelectedRow(null): setSelectedRow(rowId);
+        selectedRow === rowId ? setSelectedRow(null) : setSelectedRow(rowId);
     };
 
-
+    //фильтруем только когда изменяются rows, searchText
+    React.useEffect(() => {
+        setFilteredRows(filterRows(rows, searchText));
+    }, [rows, searchText]);
 
     React.useEffect(() => {
         console.log("rendered first");
-        dispatch(fetchRows("s"));
+        dispatch(fetchRows("l"));
     }, [dispatch]);
 
     React.useEffect(() => {
@@ -112,16 +123,18 @@ function DataTable(props) {
         {id: 'phone', numeric: false, disablePadding: false, label: 'Phone'},
     ];
 
-
-    const emptyRows = pageSize - Math.min(pageSize, rows.length - page * pageSize);
-    const paginatedRows = rows.slice(page * pageSize, page * pageSize + pageSize);
+    // const filteredRows = filterRows(rows, searchText);
+    const paginatedRows = filteredRows.slice(page * pageSize, page * pageSize + pageSize);//rows заменить на filteredRows
+    const emptyRows = pageSize - Math.min(pageSize, filteredRows.length - page * pageSize);
+    console.log(filteredRows);
+    console.log(emptyRows);
     const classes = useStyles();
     return (
         <div>
             <Grid container>
                 <Grid item xs/>
                 <Grid item xs={11}>
-                    {isLoaded? <div className={classes.root}>
+                    {isLoaded ? <div className={classes.root}>
                         <Paper className={classes.paper}>
                             <TableToolbar onAddButtonClick={onFormOpen}/>
                             <TableContainer className={classes.container}>
@@ -171,7 +184,7 @@ function DataTable(props) {
                             <TablePagination
                                 rowsPerPageOptions={[10, 25, 50]}
                                 component="div"
-                                count={rows.length}
+                                count={filteredRows.length}
                                 rowsPerPage={pageSize}
                                 page={page}
                                 onChangePage={onPageChange}

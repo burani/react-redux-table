@@ -107,7 +107,6 @@ function AddForm({open, onClose, onSubmit}) {
                                 helperText={errors.phone}
                                 fullWidth
                             />
-                            <pre>{JSON.stringify(values, null, 2)}</pre>
                             <DialogActions>
                                 <Button onClick={onClose} color="primary">
                                     Cancel

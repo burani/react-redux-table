@@ -8,16 +8,15 @@ const initialState = {
     pageSize: 25
 };
 
-//TODO: поправить сортировку для номера телефона ()
 const compareValues = (key, order = 'asc') => {
     return function innerSort(a, b) {
         if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
             return 0;
         }
 
-        const varA = key === "phone"? (a[key].match(/[0-9]+/g).join("")) :((typeof a[key] === 'string')
+        const varA = key === "phone" ? (a[key].match(/[0-9]+/g).join("")) : ((typeof a[key] === 'string')
             ? a[key].toUpperCase() : a[key]);
-        const varB = key === "phone"? (b[key].match(/[0-9]+/g).join("")) :((typeof b[key] === 'string')
+        const varB = key === "phone" ? (b[key].match(/[0-9]+/g).join("")) : ((typeof b[key] === 'string')
             ? b[key].toUpperCase() : b[key]);
 
         let comparison = 0;
@@ -58,26 +57,15 @@ const table = (state = initialState, action) => {
                 isLoaded: action.payload,
             };
         case 'SORT_ROWS': {
-            // debugger;
             return produce(state, draftState => {
-                    draftState.rows.sort(compareValues(action.payload.type, action.payload.order));
-                });
+                draftState.rows.sort(compareValues(action.payload.type, action.payload.order));
+            });
         }
         case 'ADD_ROW': {
             return produce(state, draftState => {
                 draftState.rows.unshift(action.payload);
                 draftState.page = 0;
             });
-        }
-        case 'FILTER_ROWS': {
-            const filteredRows = state.filter(o =>
-                Object.keys(o).some(k => o[k].toLowerCase().includes(action.payload.toLowerCase())));
-            return {
-                ...state,
-                rows: filteredRows,
-                page: 1,
-                totalPages: state.rows.length
-            };
         }
         default:
             return state;
