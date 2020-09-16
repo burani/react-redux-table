@@ -5,7 +5,8 @@ const initialState = {
     isLoaded: false,
     page: 0,
     totalPages: 1,
-    pageSize: 25
+    pageSize: 25,
+    selectedRow: null
 };
 
 const compareValues = (key, order = 'asc') => {
@@ -60,6 +61,12 @@ const table = (state = initialState, action) => {
             return produce(state, draftState => {
                 draftState.rows.sort(compareValues(action.payload.type, action.payload.order));
             });
+        }
+        case 'SET_SELECTED_ROW': {
+            return {
+                ...state,
+                selectedRow: JSON.parse(JSON.stringify(action.payload))
+            }
         }
         case 'ADD_ROW': {
             return produce(state, draftState => {

@@ -4,10 +4,11 @@ import {Grid, Paper, Table, TableBody, TableCell, TableContainer, TablePaginatio
 import TableHeader from "./Tableheader";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TableToolbar from "./TableToolbar";
-import {addRow, fetchRows, filterRows, setPage, setPageSize, sortRows} from "../redux/actions/table";
+import {addRow, fetchRows, filterRows, setPage, setPageSize, setSelectedRow, sortRows} from "../redux/actions/table";
 import {setSortBy} from "../redux/actions/filters";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AddForm from "./AddForm";
+import RowDisplay from "./RowDisplay";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -38,7 +39,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function DataTable() {
-    const [selectedRow, setSelectedRow] = React.useState(null);
     const [formOpen, setFormOpen] = React.useState(false);
     const [filteredRows, setFilteredRows] = React.useState([]);
     const dispatch = useDispatch();
@@ -47,6 +47,7 @@ function DataTable() {
     const pageSize = useSelector(({table}) => table.pageSize);
     const rows = useSelector(({table}) => table.rows);
     const isLoaded = useSelector(({table}) => table.isLoaded);
+    const selectedRowObj = useSelector(({table}) => table.selectedRow);
     const sortBy = useSelector(({filters}) => filters.sortBy);
     const searchText = useSelector(({filters}) => filters.searchText);
 
@@ -66,7 +67,7 @@ function DataTable() {
 
     const onFormSubmit = (values) => {
         console.log("submit form from here");
-        console.log(values);
+        // console.log(values);
         dispatch(addRow({...values, address: null, description: ""}));
         setFormOpen(false);
     };
@@ -97,8 +98,18 @@ function DataTable() {
         OnColumnHeadClick(event, property);
     };
 
-    const onRowClick = (rowId) => {
-        selectedRow === rowId ? setSelectedRow(null) : setSelectedRow(rowId);
+    const onRowDisplayClose = () => {
+        dispatch(setSelectedRow(null));
+    };
+    const onRowClick = (obj) => {
+        console.log(obj);
+        if (selectedRowObj) {
+            (selectedRowObj.id + selectedRowObj.email) === (obj.id + obj.email) ? dispatch(setSelectedRow(null)) :
+                dispatch(setSelectedRow(obj));
+        } else {
+            dispatch(setSelectedRow(obj))
+        }
+
     };
 
     //фильтруем только когда изменяются rows, searchText
@@ -108,7 +119,7 @@ function DataTable() {
 
     React.useEffect(() => {
         console.log("rendered first");
-        dispatch(fetchRows("l"));
+        dispatch(fetchRows("s"));
     }, [dispatch]);
 
     React.useEffect(() => {
@@ -126,8 +137,8 @@ function DataTable() {
     // const filteredRows = filterRows(rows, searchText);
     const paginatedRows = filteredRows.slice(page * pageSize, page * pageSize + pageSize);//rows заменить на filteredRows
     const emptyRows = pageSize - Math.min(pageSize, filteredRows.length - page * pageSize);
-    console.log(filteredRows);
-    console.log(emptyRows);
+    // console.log(filteredRows);
+    // console.log(emptyRows);
     const classes = useStyles();
     return (
         <div>
@@ -135,6 +146,8 @@ function DataTable() {
                 <Grid item xs/>
                 <Grid item xs={11}>
                     {isLoaded ? <div className={classes.root}>
+                        {selectedRowObj && <RowDisplay selectedRow={selectedRowObj} onRowDisplayClose={onRowDisplayClose}/>}
+
                         <Paper className={classes.paper}>
                             <TableToolbar onAddButtonClick={onFormOpen}/>
                             <TableContainer className={classes.container}>
@@ -148,14 +161,14 @@ function DataTable() {
                                     <TableHeader headCells={headCells} orderBy={sortBy.type} order={sortBy.order}
                                                  createOnColumnHeadClick={createOnColumnHeadClick}/>
                                     <TableBody>
-                                        {paginatedRows.map((row, index) => {
+                                        {paginatedRows.map((row) => {
                                             return (
                                                 <TableRow
                                                     hover
-                                                    onClick={(event) => onRowClick(row.id)}
+                                                    onClick={() => onRowClick(row)}
                                                     tabIndex={-1}
                                                     key={row.id + row.email}
-                                                    selected={row.id === selectedRow}
+                                                    selected={selectedRowObj ? row.id + row.email === selectedRowObj.id + selectedRowObj.email : false}
                                                 >
                                                     <TableCell
                                                         component="th"

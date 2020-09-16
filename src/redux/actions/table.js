@@ -45,6 +45,11 @@ export const addRow = (payload) => ({
     payload
 });
 
+export const setSelectedRow = (payload) => ({
+    type: "SET_SELECTED_ROW",
+    payload
+});
+
 
 //THUNKS
 //contentSize = s/l
