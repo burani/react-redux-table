@@ -1,10 +1,10 @@
-import {combineReducers} from "redux";
+import { combineReducers } from "redux";
 import filters from "./filters";
-import table from "./table"
+import table from "./table";
 
 const rootReducer = combineReducers({
-    filters,
-    table
+  filters,
+  table,
 });
 
 export default rootReducer;
