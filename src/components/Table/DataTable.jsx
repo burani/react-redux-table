@@ -19,13 +19,21 @@ import {
   setPage,
   setPageSize,
   setSelectedRow,
-  sortRows,
 } from "../../redux/actions/table";
 import { setSortBy } from "../../redux/actions/filters";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AddForm from "../AddForm";
 import RowDisplay from "./RowDisplay";
 import UserDialog from "../UserDialog";
+import {
+  selectLoaded,
+  selectPage,
+  selectPageSize,
+  selectSelectedRow,
+  selectSortBy,
+  selectPaginatedFilteredRows,
+  selectFilteredRows,
+} from "../../redux/selectors";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -63,16 +71,17 @@ const useStyles = makeStyles((theme) => ({
 function DataTable() {
   const [formOpen, setFormOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [filteredRows, setFilteredRows] = React.useState([]);
 
   const dispatch = useDispatch();
-  const page = useSelector(({ table }) => table.page);
-  const pageSize = useSelector(({ table }) => table.pageSize);
-  const rows = useSelector(({ table }) => table.rows);
-  const isLoaded = useSelector(({ table }) => table.isLoaded);
-  const selectedRowObj = useSelector(({ table }) => table.selectedRow);
-  const sortBy = useSelector(({ filters }) => filters.sortBy);
-  const searchText = useSelector(({ filters }) => filters.searchText);
+  const page = useSelector(selectPage);
+  const pageSize = useSelector(selectPageSize);
+  const isLoaded = useSelector(selectLoaded);
+  const selectedRowObj = useSelector(selectSelectedRow);
+  const sortBy = useSelector(selectSortBy);
+  // отфильтрованные
+  const filteredRows = useSelector(selectFilteredRows);
+  // с пагинацией
+  const paginatedRows = useSelector(selectPaginatedFilteredRows);
 
   const handleClose = (value) => {
     dispatch(fetchRows(value));
@@ -81,16 +90,6 @@ function DataTable() {
 
   const handleListItemClick = (value) => {
     handleClose(value);
-  };
-
-  const filterRows = (rows, searchText) => {
-    if (!searchText) return rows;
-    if (!rows.length) return [];
-    return rows.filter((o) =>
-      Object.keys(o).some((k) => {
-        return ("" + o[k]).toLowerCase().includes(searchText.toLowerCase());
-      })
-    );
   };
 
   const onPageChange = (event, newPage) => {
@@ -139,19 +138,10 @@ function DataTable() {
     }
   };
 
-  //фильтруем только когда изменяются rows, searchText
-  React.useEffect(() => {
-    setFilteredRows(filterRows(rows, searchText));
-  }, [rows, searchText]);
-
   React.useEffect(() => {
     console.log("rendered first");
     setDialogOpen(true);
   }, [dispatch]);
-
-  React.useEffect(() => {
-    dispatch(sortRows(sortBy));
-  }, [sortBy, dispatch]);
 
   const headCells = [
     { id: "id", numeric: true, disablePadding: true, label: "Id" },
@@ -171,10 +161,7 @@ function DataTable() {
     { id: "phone", numeric: false, disablePadding: false, label: "Phone" },
   ];
 
-  const paginatedRows = filteredRows.slice(
-    page * pageSize,
-    page * pageSize + pageSize
-  ); //rows заменить на filteredRows
+  // здесь может быть filtered rows, а не paginated
   const emptyRows =
     pageSize - Math.min(pageSize, filteredRows.length - page * pageSize);
   const classes = useStyles();

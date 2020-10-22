@@ -17,16 +17,6 @@ export const setRows = (payload) => ({
   payload,
 });
 
-export const sortRows = (payload) => ({
-  type: "SORT_ROWS",
-  payload,
-});
-
-export const filterRows = (payload) => ({
-  type: "FILTER_ROWS",
-  payload,
-});
-
 export const setPage = (payload) => ({
   type: "SET_PAGE",
   payload,

@@ -9,35 +9,6 @@ const initialState = {
   selectedRow: null,
 };
 
-const compareValues = (key, order = "asc") => {
-  return function innerSort(a, b) {
-    if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
-      return 0;
-    }
-
-    const varA =
-      key === "phone"
-        ? a[key].match(/[0-9]+/g).join("")
-        : typeof a[key] === "string"
-        ? a[key].toUpperCase()
-        : a[key];
-    const varB =
-      key === "phone"
-        ? b[key].match(/[0-9]+/g).join("")
-        : typeof b[key] === "string"
-        ? b[key].toUpperCase()
-        : b[key];
-
-    let comparison = 0;
-    if (varA > varB) {
-      comparison = 1;
-    } else if (varA < varB) {
-      comparison = -1;
-    }
-    return order === "desc" ? comparison * -1 : comparison;
-  };
-};
-
 const table = (state = initialState, action) => {
   switch (action.type) {
     case "SET_ROWS":
@@ -63,13 +34,6 @@ const table = (state = initialState, action) => {
         ...state,
         isLoaded: action.payload,
       };
-    case "SORT_ROWS": {
-      return produce(state, (draftState) => {
-        draftState.rows.sort(
-          compareValues(action.payload.type, action.payload.order)
-        );
-      });
-    }
     case "SET_SELECTED_ROW": {
       return {
         ...state,
